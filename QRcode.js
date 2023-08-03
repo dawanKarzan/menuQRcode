@@ -2,15 +2,31 @@ const qr = require("qrcode");
 const fs = require("fs");
 const QRCodeReader = require('qrcode-reader');
 const Jimp = require('jimp');
+const readline = require('readline');
 
-let data = {
-    "id": 1,
-    "name": "name",
-    "email": "email",
-    "gender": "gender"
-  };
-  
-  let stJson = JSON.stringify(data);
+let numberOfQRCode;
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl.question('Enter the number of QR codes to generate: ', (input) => {
+  // Convert the input string to an integer
+  numberOfQRCode = parseInt(input);
+
+  // Check if the input is a valid number
+  if (!isNaN(numberOfQRCode)) {
+    const baseUrl = 'https://website/resturant/table/';
+    const outputPath = 'tablesQR';
+    generateAndSaveQRCodes(numberOfQRCode, baseUrl, outputPath);
+  } else {
+    console.log('Invalid input. Please enter a valid number.');
+  }
+
+  // Close the readline interface
+  rl.close();
+});
   
 async function generateQRCodeImage(url, filename) {
   try {
@@ -40,38 +56,31 @@ async function decodeQRCodeImage(imagePath) {
 
 
 async function generateAndSaveQRCodes(numberOfCodes, baseUrl, outputPath) {
-    try {
-      for (let i = 0; i < numberOfCodes; i++) {
-        const dataForQR = {
-          ...data, // Use the common data from the 'data' variable
-          table: i, // Add a unique field for each QR code (e.g., table number)
-        };
-        const stJson = JSON.stringify(dataForQR); // Stringify the data
-  
-        const url = `${baseUrl}${i}`;
-        const filename = `${outputPath}/qr_code_${i}.png`;
-        await generateQRCodeImage(url, stJson, filename); // Pass the 'stJson' to the generateQRCodeImage function
-        console.log(`Generated QR Code ${i}: ${url}`);
-      }
-      console.log("All QR codes generated and saved successfully!");
-    } catch (error) {
-      console.error('Error generating and saving QR codes:', error);
-      throw error;
+  try {
+    for (let i = 0; i < numberOfCodes; i++) {
+      const url = `${baseUrl}${i}`;
+      const filename = `${outputPath}/qr_code_${i}.png`;
+      await generateQRCodeImage(url, filename);
+      console.log(`Generated QR Code ${i}: ${url}`);
     }
+    console.log("All QR codes generated and saved successfully!");
+  } catch (error) {
+    console.error('Error generating and saving QR codes:', error);
+    throw error;
   }
-  
-
-
-const numberOfQRCode = 10;
-const baseUrl = 'https://website/resturant/table/';
-const outputPath = 'tablesQR';
-const qrCodeToDecode = 'tablesQR/qr_code_0.png';
-
-if (!fs.existsSync(outputPath)) {
-  fs.mkdirSync(outputPath);
 }
 
-generateAndSaveQRCodes(numberOfQRCode, baseUrl, outputPath);
+
+// const numberOfQRCode = number;
+// const baseUrl = 'https://website/resturant/table/';
+// const outputPath = 'tablesQR';
+const qrCodeToDecode = 'tablesQR/qr_code_0.png';
+
+// if (!fs.existsSync(outputPath)) {
+//   fs.mkdirSync(outputPath);
+// }
+
+// generateAndSaveQRCodes(numberOfQRCode, baseUrl, outputPath);
 
 // Example decoding
 // decodeQRCodeImage(qrCodeToDecode)
